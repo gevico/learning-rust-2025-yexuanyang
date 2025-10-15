@@ -1,8 +1,7 @@
 /*
-	heap
-	This question requires you to implement a binary heap function
+    heap
+    This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -37,7 +36,47 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.items.push(value);
+        self.count += 1;
+        self.heapify_up(self.count);
+    }
+
+    fn heapify_up(&mut self, idx: usize) {
+        let mut current = idx;
+        while current > 1 {
+            let parent = self.parent_idx(current);
+            if (self.comparator)(&self.items[current], &self.items[parent]) {
+                self.items.swap(current, parent);
+                current = parent;
+            } else {
+                break;
+            }
+        }
+    }
+
+    fn heapify_down(&mut self, idx: usize) {
+        let mut current = idx;
+        while self.children_present(current) {
+            let left = self.left_child_idx(current);
+            let right = self.right_child_idx(current);
+
+            let mut swap_idx = current;
+
+            if left <= self.count && (self.comparator)(&self.items[left], &self.items[swap_idx]) {
+                swap_idx = left;
+            }
+
+            if right <= self.count && (self.comparator)(&self.items[right], &self.items[swap_idx]) {
+                swap_idx = right;
+            }
+
+            if swap_idx != current {
+                self.items.swap(current, swap_idx);
+                current = swap_idx;
+            } else {
+                break;
+            }
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,8 +96,7 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        1
     }
 }
 
@@ -79,13 +117,31 @@ where
 
 impl<T> Iterator for Heap<T>
 where
-    T: Default,
+    T: Default + Clone,
 {
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.count == 0 {
+            return None;
+        }
+
+        if self.count == 1 {
+            self.count = 0;
+            return Some(self.items.pop().unwrap());
+        }
+
+        let root = self.items[1].clone();
+
+        let last = self.items.pop().unwrap();
+        self.count -= 1;
+
+        if self.count > 0 {
+            self.items[1] = last;
+            self.heapify_down(1);
+        }
+
+        Some(root)
     }
 }
 
